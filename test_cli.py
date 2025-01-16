@@ -8,31 +8,44 @@ import json
 class TestCLITool(unittest.TestCase):
     def setUp(self):
         self.test_file = "test_file.txt"
-        self.test_list_folder_path = "test_list_folder"
-        self.archive_file = "archive.ath"
-        self.test_archive_folder_path = "test_archive_folder"
-        os.mkdir(self.test_list_folder_path)
-        os.mkdir(self.test_archive_folder_path)
         with open(self.test_file, "w") as f:
             f.write("This is a test file.")
+
+        self.test_list_folder_path = "test_list_folder"
+        os.mkdir(self.test_list_folder_path)
         with open(os.path.join(self.test_list_folder_path, "file_in_folder.txt"), "w") as f:
             f.write("File in folder")
+
+        self.archive_file = "archive.ath"
+        self.test_archive_folder_path = "test_archive_folder"
+        os.mkdir(self.test_archive_folder_path)
+        self.test_archive_subfolder_path = os.path.join(self.test_archive_folder_path, "subfolder")
+        os.mkdir(self.test_archive_subfolder_path)
         with open(os.path.join(self.test_archive_folder_path, "file1.txt"), "w") as f:
             f.write("File 1 Content")
         with open(os.path.join(self.test_archive_folder_path, "file2.txt"), "w") as f:
             f.write("File 2 Content")
+        with open(os.path.join(self.test_archive_subfolder_path, "file3.txt"), "w") as f:
+            f.write("File 3 Content")
 
     def tearDown(self):
         if os.path.exists(self.test_file):
             os.remove(self.test_file)
+        
+        def remove_dir(dir_path):
+            for item in os.listdir(dir_path):
+                item_path = os.path.join(dir_path, item)
+                if os.path.isdir(item_path):
+                    remove_dir(item_path) 
+                elif os.path.isfile(item_path):
+                    os.remove(item_path)
+            os.rmdir(dir_path)
+            
         if os.path.exists(self.test_list_folder_path):
-            for item in os.listdir(self.test_list_folder_path):
-                os.remove(os.path.join(self.test_list_folder_path, item))
-            os.rmdir(self.test_list_folder_path)
+            remove_dir(self.test_list_folder_path)
+
         if os.path.exists(self.test_archive_folder_path):
-            for item in os.listdir(self.test_archive_folder_path):
-                os.remove(os.path.join(self.test_archive_folder_path, item))
-            os.rmdir(self.test_archive_folder_path)
+            remove_dir(self.test_archive_folder_path)
         if os.path.exists(self.archive_file):
             os.remove(self.archive_file)
 
@@ -73,7 +86,11 @@ class TestCLITool(unittest.TestCase):
         with open(self.archive_file, "r") as archive:
             content = json.load(archive)
             self.assertIn("file1.txt", content)
+            self.assertIn("file2.txt", content)
+            self.assertIn("subfolder", content)
+            self.assertIn("file3.txt", content["subfolder"])
             self.assertEqual(content["file1.txt"], "File 1 Content")
+            self.assertEqual(content["subfolder"]["file3.txt"], "File 3 Content")
 
 
 if __name__ == "__main__":

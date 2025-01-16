@@ -49,12 +49,19 @@ def archive_folder(folder_path, archive_name):
         return
 
     archive_content = {}
-    try:
-        for item in os.listdir(folder_path):
-            item_path = os.path.join(folder_path, item)
+
+    def traverse_folder(path, archive_dict):
+        for item in os.listdir(path):
+            item_path = os.path.join(path, item)
             if os.path.isfile(item_path):
                 with open(item_path, 'r') as file:
-                    archive_content[item] = file.read()
+                    archive_dict[item] = file.read()
+            elif os.path.isdir(item_path):
+                archive_dict[item] = {}
+                traverse_folder(item_path, archive_dict[item])
+
+    try:
+        traverse_folder(folder_path, archive_content)
 
         with open(archive_name, 'w') as archive_file:
             json.dump(archive_content, archive_file)
