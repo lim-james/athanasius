@@ -98,6 +98,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=["read", "list", "archive", "extract"], help="Action to perform.")
     parser.add_argument("path", help="Path to file or folder.")
+    parser.add_argument("--output", help="output file or folder.")
 
     args = parser.parse_args()
 
@@ -108,7 +109,7 @@ def main():
     elif args.action == "archive":
         archive_folder(args.path, "archive.ath")
     elif args.action == "extract":
-        extract_folder(args.path, "folder")
+        extract_folder(args.path, args.output)
 
 if __name__ == "__main__":
     main()

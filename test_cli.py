@@ -28,7 +28,7 @@ class TestCLITool(unittest.TestCase):
         with open(os.path.join(self.test_archive_subfolder_path, "file3.txt"), "w") as f:
             f.write("File 3 Content")
 
-        self.restored_folder = "folder"
+        self.restored_folder = "restored_folder"
 
     def tearDown(self):
         if os.path.exists(self.test_file):
@@ -105,7 +105,7 @@ class TestCLITool(unittest.TestCase):
         
         self.assertTrue(os.path.exists(archive_name))
 
-        with patch("sys.argv", ["cli.py", "extract", archive_name]):
+        with patch("sys.argv", ["cli.py", "extract", archive_name, "--output", self.restored_folder]):
             main()
 
         self.assertTrue(os.path.exists(self.restored_folder))
