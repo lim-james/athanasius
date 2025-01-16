@@ -67,13 +67,37 @@ def archive_folder(folder_path, archive_name):
             json.dump(archive_content, archive_file)
     except Exception as e:
         print(f"Error: Unable to archive folder. {e}")
+        
+    
+def extract_folder(archive_name, output_folder):
+    if not os.path.exists(archive_name):
+        print(f"Error: The archive '{archive_name}' does not exists.")
+        return
+    
+    try: 
+        with open(archive_name, 'r') as archive_file:
+            archive_content = json.load(archive_file)
+
+            def recreate_folder(content, path):
+                os.makedirs(path, exist_ok=True)
+                for name, data in content.items():
+                    item_path = os.path.join(path, name)
+
+                    if isinstance(data, dict):
+                        recreate_folder(data, item_path)
+                    else:
+                        with open(item_path, 'w') as file:
+                            file.write(data)
+
+        recreate_folder(archive_content, output_folder)
+    except Exception as e:
+        print(f"Error: Unable to extract folder. {e}")
     
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=["read", "list", "archive"], help="Action to perform.")
+    parser.add_argument("action", choices=["read", "list", "archive", "extract"], help="Action to perform.")
     parser.add_argument("path", help="Path to file or folder.")
-    # parser.add_argument("--output", help="Output archive filename")
 
     args = parser.parse_args()
 
@@ -83,6 +107,8 @@ def main():
         list_folder(args.path)
     elif args.action == "archive":
         archive_folder(args.path, "archive.ath")
+    elif args.action == "extract":
+        extract_folder(args.path, "folder")
 
 if __name__ == "__main__":
     main()
