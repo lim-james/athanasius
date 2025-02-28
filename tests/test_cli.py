@@ -1,6 +1,8 @@
+import os
 import subprocess
 import shutil
 import pytest
+import hashlib
 
 def test_cli_help():
     result = subprocess.run(["ath", "--help"], capture_output=True, text=True)
@@ -114,3 +116,33 @@ def test_cli_hidden_files(tmp_path):
     subprocess.run(["ath", "-e", str(archive_path)], cwd=str(extracted_path), check=True)
 
     assert (extracted_path / ".hidden_file").exists()
+
+def generate_large_file(file_path, size_mb):
+    with open(file_path, "wb") as f:
+        f.write(os.urandom(size_mb * 1024 * 1024))
+
+def hash_file(file_path):
+    hasher = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(8192):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+@pytest.mark.slow
+def test_cli_large_file(tmp_path):
+    large_file = tmp_path / "large_test.bin"
+    generate_large_file(large_file, size_mb=500)
+
+    original_hash = hash_file(large_file)
+    archive_path = tmp_path / "large_test.ath"
+
+    subprocess.run(["ath", str(large_file), "-o", str(archive_path)], check=True)
+    assert archive_path.exists()
+
+    extracted_path = tmp_path / "extracted"
+    extracted_path.mkdir()
+    subprocess.run(["ath", "-e", str(archive_path)], cwd=str(extracted_path), check=True)
+
+    extracted_file = extracted_path / "large_test.bin"
+    assert extracted_file.exists()
+    assert hash_file(extracted_file) == original_hash
