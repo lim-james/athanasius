@@ -8,6 +8,13 @@ def test_cli_help():
     result = subprocess.run(["ath", "--help"], capture_output=True, text=True)
     assert "usage" in result.stdout.lower()
 
+@pytest.fixture(autouse=True)
+def cleanup_test_files():
+    yield
+    for file in os.listdir("."):
+        if file.endswith(".txt") or file.endswith(".ath"):
+            os.remove(file)
+
 def test_cli_archive_and_extract(tmp_path):
     file1 = tmp_path / "testfile.txt"
     file1.write_text("CLI Testing")
