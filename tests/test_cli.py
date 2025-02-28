@@ -3,6 +3,7 @@ import subprocess
 import shutil
 import pytest
 import hashlib
+import platform
 
 def test_cli_help():
     result = subprocess.run(["ath", "--help"], capture_output=True, text=True)
@@ -82,8 +83,6 @@ def test_cli_empty_folders(tmp_path):
 
     assert (extracted_path / "empty_folder").exists()
     assert (extracted_path / "empty_folder").is_dir()
-
-import platform
 
 @pytest.mark.skipif(platform.system() == "Windows", reason="Symlink tests are unreliable on Windows without admin privileges")
 def test_cli_symlinks(tmp_path):
