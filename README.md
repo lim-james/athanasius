@@ -11,7 +11,8 @@
 ```bash
 # multiple files
 ath file1.py *.txt
-
+```
+```bash
 # specified output archive name file
 ath mydir/ -o bobby
 ```
