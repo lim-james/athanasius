@@ -1,6 +1,5 @@
 import os
 import struct
-import math
 
 def extract(archive_filename):
     with open(archive_filename, "rb") as archive_file:
@@ -11,21 +10,16 @@ def extract(archive_filename):
             name_len = struct.unpack(">I", archive_file.read(4))[0]
             name = archive_file.read(name_len).decode("utf-8")
             size = struct.unpack(">Q", archive_file.read(8))[0]
-            mode = struct.unpack(">Q", archive_file.read(8))[0]
-            mtime = struct.unpack(">d", archive_file.read(8))[0]
-            file_metadata.append((name, size, mode, mtime))
+            is_empty_dir = struct.unpack(">B", archive_file.read(1))[0] == 1
+            file_metadata.append((name, size, is_empty_dir))
 
-        for (name, size, mode, mtime) in file_metadata:
-            dir_name = os.path.dirname(name)
-            if dir_name:
-                os.makedirs(dir_name, exist_ok=True)
+        for (name, size, is_empty_dir) in file_metadata:
+            if is_empty_dir:
+                os.makedirs(name, exist_ok=True)
+            else:
+                dir_name = os.path.dirname(name)
+                if dir_name:
+                    os.makedirs(dir_name, exist_ok=True)
 
-            with open(name, "wb") as f:
-                f.write(archive_file.read(size))
-
-            try:
-                os.chmod(name, mode & 0o7777)
-
-                os.utime(name, (mtime, mtime))
-            except OSError as e:
-                print(f"Warning: could not restore metadata for {name}: {e}")
+                with open(name, "wb") as f:
+                    f.write(archive_file.read(size))
