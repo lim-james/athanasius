@@ -134,7 +134,6 @@ def hash_file(file_path):
             hasher.update(chunk)
     return hasher.hexdigest()
 
-@pytest.mark.slow
 def test_cli_large_file(tmp_path):
     large_file = tmp_path / "large_test.bin"
     generate_large_file(large_file, size_mb=500)
