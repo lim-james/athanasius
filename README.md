@@ -4,6 +4,13 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Installation
+
+### Install via PyPI
+```bash
+pip install athanasius
+```
+
 ## Usage
 
 ### Archive Files/Directories
